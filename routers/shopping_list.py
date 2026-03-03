@@ -3,28 +3,31 @@ from pydantic import BaseModel
 from typing import List
 
 router = APIRouter(
-    prefix="/api/shopping-list",
-    tags=["Shopping List"]
+    prefix="/api/shopping", # Change from shopping-list to shopping
+    tags=["Shopping"]
 )
 
-# This is a temporary list. In a future step, we can link this to your database.
+# This needs to persist while the app is running
 temp_shopping_db = []
 
 class ShoppingItem(BaseModel):
-    name: str
+    item_name: str # Change from 'name' to 'item_name' to match your interface
 
-@router.get("/", response_model=List[str])
+@router.get("")
 def get_shopping_list():
-    return temp_shopping_db
+    # Return a list of objects to match your 'ShoppingItem' interface
+    return [{"id": str(i), "item_name": name, "is_purchased": False} for i, name in enumerate(temp_shopping_db)]
 
-@router.post("/")
+@router.post("")
 def add_item(item: ShoppingItem):
-    if item.name not in temp_shopping_db:
-        temp_shopping_db.append(item.name)
-    return {"message": f"Added {item.name} to list"}
+    if item.item_name not in temp_shopping_db:
+        temp_shopping_db.append(item.item_name)
+    return {"message": "Added"}
 
-@router.delete("/{item_name}")
-def delete_item(item_name: str):
-    if item_name in temp_shopping_db:
-        temp_shopping_db.remove(item_name)
-    return {"message": "Deleted"}
+# Add this to handle your 'Clear Purchased' button logic
+@router.delete("/clear/purchased")
+def clear_purchased():
+    # Since we aren't tracking 'purchased' in this simple array yet, 
+    # we'll just clear the whole thing for now
+    temp_shopping_db.clear()
+    return {"message": "Cleared"}
